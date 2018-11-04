@@ -74,7 +74,6 @@ var cyan = new Vector3(0, 1, 1);
 //var sphereLocation = new Vector3(-50, 0, 100);
 var sphereSize = 10;
 var sphereLocation = new Vector3(30, -50, 0);
-
 var sphere = new Sphere(sphereLocation, sphereSize, purple,1); // todo = new Sphere(..., ...);
 var plane = new Plane(new Vector3(0, 1, 20), new Vector3(0, 1, 0), cyan, 1); // todo = new Plane(..., ...);
 
@@ -88,6 +87,7 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
    var u = xPixelIndex-pixelsAcross/2;  //Needs to by symetrical around origin 0,0
    var v = yPixelIndex-pixelsDown/2; //Needs to by symetrical around origin 0,0
 
+   // The pixel coordinate is the location of the 
    var pixelCoordinate = new Vector3(u, v, eyeDistance); // = todo: calculate pixel position   
    var direction = pixelCoordinate.subtract(eyeCoordinate).normalize(); // = vector from the eye to the pixel
    console.debug(" X: ", xPixelIndex, " Y: ", yPixelIndex, "DX:", direction.x, "DY:", direction.y, "DZ:", direction.z)
@@ -103,9 +103,12 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
 // -----------------------------------------------------------------------------
 function setPixelColor(xPixelIndex, yPixelIndex, color /* now vector */ /*[0,1]*/) {
 
-    /* Note since color is stored as a vector in sphere, we will use xyz as RGB */
-   var index = xPixelIndex*4+yPixelIndex*4*canvas.width;
-	imageData.data[index + 0] = color.x * 255;
+   var componetsPerPixel = 4;
+   //Every pixel we move down the number of line * the number of componets per line plus the number of pixels in the current line times the number of componets per pixel
+   var index = (xPixelIndex * componetsPerPixel)+(yPixelIndex * componetsPerPixel * pixelsAcross);
+   
+   /* Note since color is stored as a vector in sphere, we will use xyz as RGB */
+   imageData.data[index + 0] = color.x * 255;
 	imageData.data[index + 1] = color.y  * 255;
    imageData.data[index + 2] = color.z * 255;
 	imageData.data[index + 3] = 255;
