@@ -81,7 +81,7 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
    var pixelCoordinate; // = todo: calculate pixel position
    var pixelCoordinate = new Vector3((xPixelIndex-canvas.width/2)/100, (yPixelIndex-canvas.height/2)/100, eyeDistance);
 	var direction; // = vector from the eye to the pixel
-	var direction = pixelCoordinate.subtract(pixelCoordinate);
+	var direction = pixelCoordinate.subtract(eyeCoordinate);
 
 	// Creates a ray that will automatically normalize the direction
 	// Uncomment this (the ray line of code) once you've calculated the pixelCoordinate in space and the
