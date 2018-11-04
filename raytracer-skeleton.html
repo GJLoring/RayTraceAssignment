@@ -71,7 +71,7 @@ var up = new Vector3(0, 1, 0);
 var purple = new Vector3(0.5, 0, 1);
 var cyan = new Vector3(0, 1, 1);
 var sphereSize = 100;
-var sphereLocation = new Vector3(-30, -50, 0);
+var sphereLocation = new Vector3(-50, -50, 14);
 var sphere = new Sphere(sphereLocation, sphereSize, purple,1); // todo = new Sphere(..., ...);
 var plane = new Plane(new Vector3(0, -1, 1), new Vector3(0, 1, 0), cyan, 1); // todo = new Plane(..., ...);
 
@@ -142,6 +142,21 @@ function updateAndRender(timeElapsed) {
             else{
                var color = plane.color;
             }
+
+            //Debug Color scheme Start 
+            // Green is the sphere only
+            // Red is plane only
+            //Yellow is both sphere and plane
+            if (sphereResult.hit && planeResult.hit){
+               var color = new Vector3(1, 1, );
+            }
+            else if (sphereResult.hit) {
+               var color = new Vector3(0, 1, 0);
+            }else{
+               var color = new Vector3(1, 0, 0);
+            }
+            //Debug Color scheme Start
+
 				setPixelColor(xPixelIndex, yPixelIndex, color); //Added color since we have to do extra credit // middle gray
 			} else {
 				// we didn't hit anything, choose an appropriate backbround color
