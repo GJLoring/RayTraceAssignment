@@ -41,10 +41,10 @@ var fov = 45;   // if this changes, your code should still work
 var fovRadians = fov * 3.1415 / 180; // todo -> convert degrees to radians
 
 var pixelWidth = pixelsAcross / 100; // todo -> what's the size of a pixel from left to right?
-var pixelHalfWidth = pixelWidth; // todo -> half of the pixel width
+var pixelHalfWidth = pixelWidth / 2; // todo -> half of the pixel width
 
 // How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
-var eyeDistance = pixelWidth / Math.tan(fovRadians / 2)  ; // = todo -> hint: related to tangent and field of view (see slides)
+var eyeDistance = pixelHalfWidth / Math.tan(fovRadians / 2)  ; // = todo -> hint: related to tangent and field of view (see slides)
 // -----------
 // |         /
 // |        /
