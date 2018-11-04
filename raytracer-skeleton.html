@@ -38,13 +38,13 @@ var imageData = canvasContext.getImageData(0, 0, pixelsAcross, pixelsDown);
 
 // Raytracer setup
 var fov = 45;   // if this changes, your code should still work
-var fovRadians; // todo -> convert degrees to radians
+var fovRadians = fov * 3.1415 / 180; // todo -> convert degrees to radians
 
-var pixelWidth; // todo -> what's the size of a pixel from left to right?
-var pixelHalfWidth; // todo -> half of the pixel width
+var pixelWidth = pixelsAcross / 100; // todo -> what's the size of a pixel from left to right?
+var pixelHalfWidth = pixelWidth; // todo -> half of the pixel width
 
 // How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
-var eyeDistance; // = todo -> hint: related to tangent and field of view (see slides)
+var eyeDistance = fovRadians / 2 ; // = todo -> hint: related to tangent and field of view (see slides)
 // -----------
 // |         /
 // |        /
@@ -79,7 +79,7 @@ var plane = new Plane(new Vector3(1, 2, 3), 1, 1, 1); // todo = new Plane(..., .
 function generateRayForPixel(xPixelIndex, yPixelIndex) {
 
    var pixelCoordinate; // = todo: calculate pixel position
-   var pixelCoordinate = new Vector3((xPixelIndex-canvas.width/2)/100, (yPixelIndex-canvas.height/2)/100, 4);
+   var pixelCoordinate = new Vector3((xPixelIndex-canvas.width/2)/100, (yPixelIndex-canvas.height/2)/100, eyeDistance);
 	var direction; // = vector from the eye to the pixel
 	var direction = pixelCoordinate.normalize();
 
