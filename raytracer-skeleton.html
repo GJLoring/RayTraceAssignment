@@ -44,7 +44,7 @@ var pixelWidth = pixelsAcross / 100; // todo -> what's the size of a pixel from 
 var pixelHalfWidth = pixelWidth; // todo -> half of the pixel width
 
 // How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
-var eyeDistance = fovRadians / 2 ; // = todo -> hint: related to tangent and field of view (see slides)
+var eyeDistance = pixelWidth / Math.tan(fovRadians / 2)  ; // = todo -> hint: related to tangent and field of view (see slides)
 // -----------
 // |         /
 // |        /
@@ -69,7 +69,7 @@ var up = new Vector3(0, 1, 0);
 // They also provide a "raycast" function that you can pass a ray to
 // in order to find intersection between the ray and the object
 
-var sphere = new Sphere(new Vector3(1, 2, 3), 10); // todo = new Sphere(..., ...);
+var sphere = new Sphere(new Vector3(10, 20, 00), 10); // todo = new Sphere(..., ...);
 var plane = new Plane(new Vector3(1, 2, 3), 1, 1, 1); // todo = new Plane(..., ...);
 
 // end of raytracer setup ******************************************************
@@ -81,7 +81,7 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
    var pixelCoordinate; // = todo: calculate pixel position
    var pixelCoordinate = new Vector3((xPixelIndex-canvas.width/2)/100, (yPixelIndex-canvas.height/2)/100, eyeDistance);
 	var direction; // = vector from the eye to the pixel
-	var direction = pixelCoordinate.normalize();
+	var direction = pixelCoordinate.subtract(pixelCoordinate);
 
 	// Creates a ray that will automatically normalize the direction
 	// Uncomment this (the ray line of code) once you've calculated the pixelCoordinate in space and the
