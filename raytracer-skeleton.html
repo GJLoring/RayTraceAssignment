@@ -18,8 +18,8 @@
 var canvas = document.getElementById('my-canvas');
 
 // The canvas dimension we will set
-var pixelsAcross = 256;  // pixels across
-var pixelsDown = 256; // pixels down
+var pixelsAcross = 64;  // pixels across //Todo set back to 256 before turning in
+var pixelsDown = 64; // pixels down //Todo set back to 256 before turning in
 
 // Set dimensions and pixel scale (don't worry about pixel scale, it won't affect your maths)
 var pixelScale = 3;
@@ -68,9 +68,16 @@ var up = new Vector3(0, 1, 0);
 // These are 3d definitions that match all of the math we did in class
 // They also provide a "raycast" function that you can pass a ray to
 // in order to find intersection between the ray and the object
+var purple = new Vector3(0.5, 0, 1);
+var cyan = new Vector3(0, 1, 1);
+//var sphereSize = 100;
+//var sphereLocation = new Vector3(-50, 0, 100);
+var sphereSize = 10;
+var sphereLocation = new Vector3(30, -50, 0);
 
-var sphere = new Sphere(new Vector3(0, 150, 100), 100, new Vector3(0.5, 0, 1),1); //Purple!!! // todo = new Sphere(..., ...);
-var plane = new Plane(new Vector3(0, 1, 20), new Vector3(0, 1, 0), new Vector3(0, 1, 1), 1); // Cyan // todo = new Plane(..., ...);
+var sphere = new Sphere(sphereLocation, sphereSize, purple,1); // todo = new Sphere(..., ...);
+var plane = new Plane(new Vector3(0, 1, 20), new Vector3(0, 1, 0), cyan, 1); // todo = new Plane(..., ...);
+
 
 // end of raytracer setup ******************************************************
 
@@ -78,22 +85,11 @@ var plane = new Plane(new Vector3(0, 1, 20), new Vector3(0, 1, 0), new Vector3(0
 // return a ray that goes from the eye point through the pixel at index (xPixelIndex, yPixelIndex)
 function generateRayForPixel(xPixelIndex, yPixelIndex) {
 
-   var u = xPixelIndex-pixelsDown/2;  //Needs to by symetrical around origin 0,0
-   var v = yPixelIndex-pixelsAcross/2; //Needs to by symetrical around origin 0,0
+   var u = xPixelIndex-pixelsAcross/2;  //Needs to by symetrical around origin 0,0
+   var v = yPixelIndex-pixelsDown/2; //Needs to by symetrical around origin 0,0
 
-   var pixelCoordinate = new Vector3(u, v, 0); // = todo: calculate pixel position   
-   //var direction = eyeCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
-
-   var pixelCoordinate = new Vector3((xPixelIndex-pixelsAcross/2)/100, (yPixelIndex-pixelsDown/2)/100, eyeDistance); // = todo: calculate pixel position   
-   var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
-   //var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
-
-   //var u = xPixelIndex/pixelsDown;
-   //var v = yPixelIndex/pixelsAcross;   
-   //var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
-
-
-
+   var pixelCoordinate = new Vector3(u, v, eyeDistance); // = todo: calculate pixel position   
+   var direction = pixelCoordinate.subtract(eyeCoordinate).normalize(); // = vector from the eye to the pixel
    console.debug(" X: ", xPixelIndex, " Y: ", yPixelIndex, "DX:", direction.x, "DY:", direction.y, "DZ:", direction.z)
 
 
