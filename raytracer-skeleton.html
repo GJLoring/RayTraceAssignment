@@ -69,7 +69,7 @@ var up = new Vector3(0, 1, 0);
 // They also provide a "raycast" function that you can pass a ray to
 // in order to find intersection between the ray and the object
 
-var sphere = new Sphere(new Vector3(0, 150, 100), 100,1,1); // todo = new Sphere(..., ...);
+var sphere = new Sphere(new Vector3(0, 150, 100), 100, new Vector3(0.5, 0, 1),1); //Purple!!! // todo = new Sphere(..., ...);
 var plane = new Plane(up, 1, 1, 1); // todo = new Plane(..., ...);
 
 // end of raytracer setup ******************************************************
@@ -78,8 +78,10 @@ var plane = new Plane(up, 1, 1, 1); // todo = new Plane(..., ...);
 // return a ray that goes from the eye point through the pixel at index (xPixelIndex, yPixelIndex)
 function generateRayForPixel(xPixelIndex, yPixelIndex) {
 
-   var pixelCoordinate = new Vector3((xPixelIndex-canvas.width/2)/100, (yPixelIndex-canvas.height/2)/100, eyeDistance); // = todo: calculate pixel position
+   var pixelCoordinate = new Vector3((xPixelIndex-pixelsAcross/2)/100, (yPixelIndex-pixelsDown/2)/100, eyeDistance); // = todo: calculate pixel position   var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
    var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
+   console.debug(" X: ", xPixelIndex, " Y: ", yPixelIndex, "DX:", direction.x, "DY:", direction.y, "DZ:", direction.z)
+
 
 	// Creates a ray that will automatically normalize the direction
 	// Uncomment this (the ray line of code) once you've calculated the pixelCoordinate in space and the
@@ -89,12 +91,13 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
 }
 
 // -----------------------------------------------------------------------------
-function setPixelColor(xPixelIndex, yPixelIndex, shadeOfGray /*[0,1]*/) {
+function setPixelColor(xPixelIndex, yPixelIndex, color /* now vector */ /*[0,1]*/) {
 
+    /* Note since color is stored as a vector in sphere, we will use xyz as RGB */
    var index = xPixelIndex*4+yPixelIndex*4*canvas.width;
-	imageData.data[index + 0] = shadeOfGray * 255;
-	imageData.data[index + 1] = shadeOfGray * 255;
-	imageData.data[index + 2] = shadeOfGray * 255;
+	imageData.data[index + 0] = color.x * 255;
+	imageData.data[index + 1] = color.y  * 255;
+   imageData.data[index + 2] = color.z * 255;
 	imageData.data[index + 3] = 255;
 
 	// feel free to delete this when you are done implementing this function
@@ -121,8 +124,14 @@ function updateAndRender(timeElapsed) {
 			var hitAnything = (sphereResult.hit || planeResult.hit);
 
 			if (hitAnything) {
-				// determine  which hit object is the closest (in case there is more than 1 hit)
-				setPixelColor(xPixelIndex, yPixelIndex, 0.5); // middle gray
+            // determine  which hit object is the closest (in case there is more than 1 hit)
+            if (sphereResult.hit){
+               var color = sphere.color;
+            }
+            else{
+               var color = plane.color;
+            }
+				setPixelColor(xPixelIndex, yPixelIndex, color); //Added color since we have to do extra credit // middle gray
 			} else {
 				// we didn't hit anything, choose an appropriate backbround color
 				setPixelColor(xPixelIndex, yPixelIndex, 0.1); // dark gray
