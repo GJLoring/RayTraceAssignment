@@ -44,7 +44,7 @@ var pixelWidth = pixelsAcross / 100; // todo -> what's the size of a pixel from 
 var pixelHalfWidth = pixelWidth / 2; // todo -> half of the pixel width
 
 // How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
-var eyeDistance = pixelHalfWidth / Math.tan(fovRadians / 2)  ; // = todo -> hint: related to tangent and field of view (see slides)
+var eyeDistance = (pixelsAcross/2) / Math.atan(fovRadians / 2)  ; // = todo -> hint: related to tangent and field of view (see slides)
 // -----------
 // |         /
 // |        /
@@ -70,12 +70,10 @@ var up = new Vector3(0, 1, 0);
 // in order to find intersection between the ray and the object
 var purple = new Vector3(0.5, 0, 1);
 var cyan = new Vector3(0, 1, 1);
-//var sphereSize = 100;
-//var sphereLocation = new Vector3(-50, 0, 100);
-var sphereSize = 10;
-var sphereLocation = new Vector3(30, -50, 0);
+var sphereSize = 100;
+var sphereLocation = new Vector3(-30, -50, 0);
 var sphere = new Sphere(sphereLocation, sphereSize, purple,1); // todo = new Sphere(..., ...);
-var plane = new Plane(new Vector3(0, 1, 20), new Vector3(0, 1, 0), cyan, 1); // todo = new Plane(..., ...);
+var plane = new Plane(new Vector3(0, -1, 1), new Vector3(0, 1, 0), cyan, 1); // todo = new Plane(..., ...);
 
 
 // end of raytracer setup ******************************************************
@@ -86,11 +84,11 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
 
    var u = xPixelIndex-pixelsAcross/2;  //Needs to by symetrical around origin 0,0
    var v = yPixelIndex-pixelsDown/2; //Needs to by symetrical around origin 0,0
-
+   var z = eyeDistance;                //Distance behind the screen
    // The pixel coordinate is the location of the 
-   var pixelCoordinate = new Vector3(u, v, eyeDistance); // = todo: calculate pixel position   
-   var direction = pixelCoordinate.subtract(eyeCoordinate).normalize(); // = vector from the eye to the pixel
-   console.debug(" X: ", xPixelIndex, " Y: ", yPixelIndex, "DX:", direction.x, "DY:", direction.y, "DZ:", direction.z)
+   var pixelCoordinate = new Vector3(u, v, z); // = todo: calculate pixel position   
+   var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
+   //console.debug(" X: ", xPixelIndex, " Y: ", yPixelIndex, "DX:", direction.x, "DY:", direction.y, "DZ:", direction.z)
 
 
 	// Creates a ray that will automatically normalize the direction
@@ -138,7 +136,7 @@ function updateAndRender(timeElapsed) {
 
 			if (hitAnything) {
             // determine  which hit object is the closest (in case there is more than 1 hit)
-            if (sphereResult.hit){
+            if (sphereResult.hit>planeResult.hit){
                var color = sphere.color;
             }
             else{
