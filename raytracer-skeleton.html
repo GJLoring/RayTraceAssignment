@@ -147,22 +147,17 @@ function updateAndRender(timeElapsed) {
 
 			if (hitAnything) {
             // determine  which hit object is the closest (in case there is more than 1 hit)
-            if (sphereResult.distance < planeResult.distance){
-               var color = sphere.color;
-               color.x = 1;
-               color.y = 1;
-               color.z = 1;
+            if (sphereResult.hit){
+               var color = sphere.color.clone();
                //Shading 
                var cloneNormal = sphereResult.normal.clone();
                var normalDotLight = cloneNormal.dot((sphereResult.point.clone().subtract(lightPos)).normalized());
             }
             else{
-               var color = plane.color;
+               var color = plane.color.clone();
                //Shading 
-               //Gabe note planeResult does not exist here!!!! 
-               //var cloneNormal = planeResult.normal.clone();
-               //var normalDotLight = planeResult.normal.dot((planeResult.point.clone().subtract(lightPos)).normalized());
-               var normalDotLight = 1;//planeResult.normal.dot((planeResult.point.clone().subtract(lightPos)).normalized());
+               var cloneNormal = planeResult.normal.clone();
+               var normalDotLight = planeResult.normal.dot((planeResult.point.clone().subtract(lightPos)).normalized());
             }
 
 				setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight)); //Added color since we have to do extra credit // middle gray
