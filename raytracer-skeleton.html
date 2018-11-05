@@ -44,6 +44,7 @@ var pixelWidth = pixelsAcross / 100; // todo -> what's the size of a pixel from 
 var pixelHalfWidth = pixelWidth / 2; // todo -> half of the pixel width
 
 // How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
+// GABE NOTE !  this evaluates to 3.09, I believe this is correct, but a second set of eyes would be good
 var eyeDistance = pixelHalfWidth / Math.tan(fovRadians / 2); // = todo -> hint: related to tangent and field of view (see slides)
 // -----------
 // |         /
@@ -82,12 +83,22 @@ var plane = new Plane(new Vector3(0, -1, 1), new Vector3(0, 1, 0), cyan, 1); // 
 // return a ray that goes from the eye point through the pixel at index (xPixelIndex, yPixelIndex)
 function generateRayForPixel(xPixelIndex, yPixelIndex) {
 
+   // GABE NOTE I am not certain if these need to scale as a percent of the total width /height
    var u = xPixelIndex-pixelsAcross/2;  //Needs to by symetrical around origin 0,0
    var v = yPixelIndex-pixelsDown/2; //Needs to by symetrical around origin 0,0
-   var z = eyeDistance;                //Distance behind the screen
+   var z = 0;//eyeDistance;                //Distance behind the screen ( GABE Note eye distance or zero)
    // The pixel coordinate is the location of the 
-   var pixelCoordinate = new Vector3(u/pixelsAcross, v/pixelsDown, z); // = todo: calculate pixel position   
+   var pixelCoordinate = new Vector3(u, v, z); // = todo: calculate pixel position   
    var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
+   
+   /* Gabe Note originally I normalized the coords, however, that created an extream fisheye view
+   var z = 0;                //Distance behind the screen
+   var pixelCoordinate = new Vector3(u, v, z); // = todo: calculate pixel position   
+   var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
+   pixelCoordinate.normalize();
+   var t = eyeCoordinate.clone();
+   var direction = pixelCoordinate.subtract(t.normalize()); // = vector from the eye to the pixel
+   */
    //console.debug(" X: ", xPixelIndex, " Y: ", yPixelIndex, "DX:", direction.x, "DY:", direction.y, "DZ:", direction.z)
 
 
@@ -145,6 +156,7 @@ function updateAndRender(timeElapsed) {
                var color = plane.color;
             }
 
+            // GABE NOTE !  This is to debug only, delete before turinging in
             //Debug Color scheme Start 
             // Green is the sphere only
             // Red is plane only
