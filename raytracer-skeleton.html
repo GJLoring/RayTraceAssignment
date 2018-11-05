@@ -18,8 +18,8 @@
 var canvas = document.getElementById('my-canvas');
 
 // The canvas dimension we will set
-var pixelsAcross = 64;  // pixels across //Todo set back to 256 before turning in
-var pixelsDown = 64; // pixels down //Todo set back to 256 before turning in
+var pixelsAcross = 256;  // pixels across 
+var pixelsDown = 256; // pixels down 
 
 // Set dimensions and pixel scale (don't worry about pixel scale, it won't affect your maths)
 var pixelScale = 3;
@@ -44,7 +44,7 @@ var pixelWidth = pixelsAcross / 100; // todo -> what's the size of a pixel from 
 var pixelHalfWidth = pixelWidth / 2; // todo -> half of the pixel width
 
 // How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
-var eyeDistance = (pixelsAcross/2) / Math.atan(fovRadians / 2)  ; // = todo -> hint: related to tangent and field of view (see slides)
+var eyeDistance = pixelHalfWidth / Math.tan(fovRadians / 2); // = todo -> hint: related to tangent and field of view (see slides)
 // -----------
 // |         /
 // |        /
@@ -70,8 +70,8 @@ var up = new Vector3(0, 1, 0);
 // in order to find intersection between the ray and the object
 var purple = new Vector3(0.5, 0, 1);
 var cyan = new Vector3(0, 1, 1);
-var sphereSize = 100;
-var sphereLocation = new Vector3(-50, -50, 14);
+var sphereSize = 2.0;
+var sphereLocation = new Vector3(8, sphereSize/2, sphereSize); // Back from camera, up and down, left and right
 var sphere = new Sphere(sphereLocation, sphereSize, purple,1); // todo = new Sphere(..., ...);
 var plane = new Plane(new Vector3(0, -1, 1), new Vector3(0, 1, 0), cyan, 1); // todo = new Plane(..., ...);
 
@@ -86,7 +86,7 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
    var v = yPixelIndex-pixelsDown/2; //Needs to by symetrical around origin 0,0
    var z = eyeDistance;                //Distance behind the screen
    // The pixel coordinate is the location of the 
-   var pixelCoordinate = new Vector3(u, v, z); // = todo: calculate pixel position   
+   var pixelCoordinate = new Vector3(u/pixelsAcross, v/pixelsDown, z); // = todo: calculate pixel position   
    var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
    //console.debug(" X: ", xPixelIndex, " Y: ", yPixelIndex, "DX:", direction.x, "DY:", direction.y, "DZ:", direction.z)
 
@@ -120,6 +120,8 @@ function setPixelColor(xPixelIndex, yPixelIndex, color /* now vector */ /*[0,1]*
 
 // -----------------------------------------------------------------------------
 function updateAndRender(timeElapsed) {
+   var sphereHits = 0;
+   var sphereSum = 0;
 	// Go through every pixel
 	for (var yPixelIndex = 0; yPixelIndex < pixelsDown; ++yPixelIndex) {
 		for (var xPixelIndex = 0; xPixelIndex < pixelsAcross; ++xPixelIndex) {
@@ -148,10 +150,12 @@ function updateAndRender(timeElapsed) {
             // Red is plane only
             //Yellow is both sphere and plane
             if (sphereResult.hit && planeResult.hit){
-               var color = new Vector3(1, 1, );
+               var color = new Vector3(1, 1, 0);
             }
             else if (sphereResult.hit) {
                var color = new Vector3(0, 1, 0);
+               sphereSum = sphereSum + sphereResult.distance;
+               sphereHits = sphereHits + 1;
             }else{
                var color = new Vector3(1, 0, 0);
             }
@@ -163,7 +167,8 @@ function updateAndRender(timeElapsed) {
 				setPixelColor(xPixelIndex, yPixelIndex, 0.1); // dark gray
 			}
 		}
-	}
+   }
+   var average = sphereSum / sphereHits;
 
 	// Take our array of color data and give to the canvas to display
 	canvasContext.putImageData(imageData, 0, 0);
