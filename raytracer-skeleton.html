@@ -75,11 +75,15 @@ var blue = new Vector3(0, 0, 1);
 var white = new Vector3(1, 1, 1);
 
 var objects = [];
-objects.push(new Sphere(new Vector3(0,0, 0), 0.2, purple,1));
+objects.push(new Sphere(new Vector3(0,0, 0), 0.1, purple,1));
 objects.push(new Sphere(new Vector3(0.15, 0.2, 0.2), 0.15, cyan,1));
 objects.push(new Sphere(new Vector3(-0.15, 0.2, 0.2), 0.1, green,1));
-objects.push(new Plane(new Vector3(0, 0, 1), new Vector3(0, -0.4, 0), blue, 1)); //backwall
 objects.push(new Plane(new Vector3(0, -1, 1), new Vector3(-0.4, 0.10, 0), white, 1)); // Floor
+objects.push(new Plane(new Vector3(0.1, 0, 0.3), new Vector3(-0.23, 1, 0), red)); //leftwall
+objects.push(new Plane(new Vector3(-0.1, 0, 0.25), new Vector3(0.23, 0, 0), green)); //rightwall
+objects.push(new Plane(new Vector3(0, 1, 1), new Vector3(0.4, -0.2, 0), white, 1)); // ceiling
+objects.push(new Plane(new Vector3(0, 0, 1), new Vector3(0, -0.4, 0), white, 1)); //backwall
+
 
 var farAway = 100000;
 // end of raytracer setup ******************************************************
