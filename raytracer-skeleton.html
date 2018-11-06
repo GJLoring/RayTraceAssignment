@@ -154,7 +154,7 @@ function updateAndRender(timeElapsed) {
 
                     //Find reflected ray for spheres only
                     var color = objects[item].color.clone();
-                    if(objects[shadowCheck] instanceof Sphere){
+                    if(objects[item] instanceof Sphere){
                         var reflectionRay = pixelRay.clone();
                         reflectionRay.direction.dot(objResult.normal)
                         //Need to figure out how to mirror the ray here
