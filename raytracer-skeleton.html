@@ -38,14 +38,13 @@ var imageData = canvasContext.getImageData(0, 0, pixelsAcross, pixelsDown);
 
 // Raytracer setup
 var fov = 45;   // if this changes, your code should still work
-var fovRadians = fov * 3.1415 / 180; // todo -> convert degrees to radians
+var fovRadians = fov * 3.1415 / 180;
 
-var pixelWidth = pixelsAcross/4 ; // todo -> what's the size of a pixel from left to right?
-var pixelHalfWidth = pixelWidth / 2; // todo -> half of the pixel width
+var pixelWidth = pixelsAcross/4 ;
+var pixelHalfWidth = pixelWidth / 2;
 
 // How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
-var eyeDistance = pixelHalfWidth / Math.tan(fovRadians / 2); // = todo -> hint: related to tangent and field of view (see slides)
-// -----------
+var eyeDistance = pixelHalfWidth / Math.tan(fovRadians / 2);
 // |         /
 // |        /
 // |       /
@@ -74,8 +73,6 @@ var red = new Vector3(1, 0, 0);
 var green = new Vector3(0, 1, 0);
 var blue = new Vector3(0, 0, 1);
 var white = new Vector3(1, 1, 1);
-//var sphere = new Sphere(sphereLocation, sphereSize, purple,1); // todo = new Sphere(..., ...);
-//var plane = new Plane(new Vector3(0, 1, 0), new Vector3(0, -0.2, 0), cyan, 1); // todo = new Plane(..., ...);
 
 var objects = [];
 objects.push(new Sphere(new Vector3(0,0, 0), 0.2, purple,1));
@@ -83,13 +80,14 @@ objects.push(new Sphere(new Vector3(0.15, 0.2, 0.2), 0.15, cyan,1));
 objects.push(new Sphere(new Vector3(-0.15, 0.2, 0.2), 0.1, green,1));
 objects.push(new Plane(new Vector3(0, 0, 1), new Vector3(0, -0.4, 0), blue, 1)); //backwall
 objects.push(new Plane(new Vector3(0, -1, 1), new Vector3(-0.4, 0.10, 0), white, 1)); // Floor
+
+var farAway = 100000;
 // end of raytracer setup ******************************************************
 
 // -----------------------------------------------------------------------------
 // return a ray that goes from the eye point through the pixel at index (xPixelIndex, yPixelIndex)
 function generateRayForPixel(xPixelIndex, yPixelIndex) {
 
-   // GABE NOTE I am not certain if these need to scale as a percent of the total width /height
    var u = xPixelIndex-pixelsAcross/2;  //Needs to by symetrical around origin 0,0
    var v = yPixelIndex-pixelsDown/2; //Needs to by symetrical around origin 0,0
    // The pixel coordinate is the location of the
@@ -100,8 +98,6 @@ function generateRayForPixel(xPixelIndex, yPixelIndex) {
    var t = eyeCoordinate.clone();
    var direction = pixelCoordinate.subtract(t.normalize()); // = vector from the eye to the pixel
 
-	// Creates a ray that will automatically normalize the direction
-	// Uncomment this (the ray line of code) once you've calculated the pixelCoordinate in space and the
 	// direction from the eye to the pixelCoordinate
 	var pixelRay = new Ray(eyeCoordinate, direction);
 	return pixelRay;
@@ -129,14 +125,23 @@ function updateAndRender(timeElapsed) {
 	for (var yPixelIndex = 0; yPixelIndex < pixelsDown; ++yPixelIndex) {
 		for (var xPixelIndex = 0; xPixelIndex < pixelsAcross; ++xPixelIndex) {
 
-			// Uncomment this once you've coded generateRayForPixel
 			var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
 
-            var minDepth = 10000; // Big number
+            var minDepth = farAway; // Big number
             setPixelColor(xPixelIndex, yPixelIndex, 0.1);
             for (var item = 0; item < objects.length; item++) {
                 var objResult = objects[item].raycast(pixelRay);
                 if(objResult.hit){
+                    /* Shadow cast, needs an offset maybe still working on
+                    for (var shadowCheck = 0; shadowCheck < objects.length; shadowCheck++) {
+                        var shadowRay = new Ray(objResult.point, lightPos );
+                        var shadowResult = objects[shadowCheck].raycast(shadowRay);
+                        if(shadowResult.hit){
+                            minDepth = -1;
+                            break;
+                        }
+                    }
+                    end shadow cast */
                     if(objResult.distance <= minDepth){
                         minDepth = objResult.distance;
                         var color = objects[item].color.clone();
