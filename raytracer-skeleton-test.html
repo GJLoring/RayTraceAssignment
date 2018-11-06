@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Raytracer</title>
+</head>
+<body>
+<canvas id='my-canvas'><canvas>
+
+<script src='vector3.js'></script>
+<script src='ray.js'></script>
+<script src='sphere.js'></script>
+<script src='plane.js'></script>
+<script>
+
+// Canvas setup, don't need to touch any of this *******************************
+// Get a reference to the javascript object associated with the canvas
+var canvas = document.getElementById('my-canvas');
+
+// The canvas dimension we will set
+var pixelsAcross = 256;  // pixels across
+var pixelsDown = 256; // pixels down
+
+// Set dimensions and pixel scale (don't worry about pixel scale, it won't affect your maths)
+var pixelScale = 3;
+canvas.width = pixelsAcross;
+canvas.height = pixelsDown;
+canvas.style.cssText = 'width:' + (pixelsAcross * pixelScale) + 'px;height:' + (pixelsDown * pixelScale) + 'px';
+
+// Get the context from the canvas (in this case we just want 2d)
+var canvasContext = canvas.getContext('2d');
+
+// Get an array representing all of the pixels
+// Arranged left to right, top to bottom
+var imageData = canvasContext.getImageData(0, 0, pixelsAcross, pixelsDown);
+// end canvas setup ************************************************************
+
+
+// Raytracer setup
+var fov = 45;   // if this changes, your code should still work
+var fovRadians = fov * 3.1415 / 180;
+
+var pixelWidth = pixelsAcross/4 ;
+var pixelHalfWidth = pixelWidth / 2;
+
+// How far away (scalar) the eye is from the image plane (see MV3202 guide for more info)
+var eyeDistance = pixelHalfWidth / Math.tan(fovRadians / 2);
+// |         /
+// |        /
+// |       /
+// | 45/2 /      <---- half angle
+// |     /
+// |    /
+// |   /
+// |  /
+// | /
+
+// important vectors
+var eyeCoordinate = new Vector3(0, 0, eyeDistance); // all of your rays will use this
+
+// these can be convenient (up to you whether you want to use them)
+var right = new Vector3(1, 0, 0);
+var up = new Vector3(0, 1, 0);
+
+// Define the scene objects here ------------------
+
+// These are 3d definitions that match all of the math we did in class
+// They also provide a "raycast" function that you can pass a ray to
+// in order to find intersection between the ray and the object
+var purple = new Vector3(0.5, 0, 1);
+var cyan = new Vector3(0, 1, 1);
+var red = new Vector3(1, 0, 0);
+var green = new Vector3(0, 1, 0);
+var blue = new Vector3(0, 0, 1);
+var white = new Vector3(1, 1, 1);
+
+var objects = [];
+objects.push(new Sphere(new Vector3(0,0, 0), 0.1, purple,1));
+objects.push(new Sphere(new Vector3(0.15, 0.2, 0.2), 0.15, cyan,1));
+objects.push(new Sphere(new Vector3(-0.15, 0.2, 0.2), 0.1, green,1));
+objects.push(new Plane(new Vector3(0, -1, 1), new Vector3(-0.4, 0.10, 0), white, 1)); // Floor
+objects.push(new Plane(new Vector3(0.1, 0, 0.3), new Vector3(-0.23, 1, 0), red)); //leftwall
+objects.push(new Plane(new Vector3(-0.1, 0, 0.25), new Vector3(0.23, 0, 0), green)); //rightwall
+objects.push(new Plane(new Vector3(0, 1, 1), new Vector3(0.4, -0.2, 0), white, 1)); // ceiling
+objects.push(new Plane(new Vector3(0, 0, 1), new Vector3(0, -0.4, 0), white, 1)); //backwall
+
+
+var farAway = 100000;
+// end of raytracer setup ******************************************************
+
+// -----------------------------------------------------------------------------
+// return a ray that goes from the eye point through the pixel at index (xPixelIndex, yPixelIndex)
+function generateRayForPixel(xPixelIndex, yPixelIndex) {
+
+   var u = xPixelIndex-pixelsAcross/2;  //Needs to by symetrical around origin 0,0
+   var v = yPixelIndex-pixelsDown/2; //Needs to by symetrical around origin 0,0
+   // The pixel coordinate is the location of the
+   var z = -eyeDistance;                //Distance behind the screen
+   var pixelCoordinate = new Vector3(u/100, v/100, z ); // = todo: calculate pixel position
+   var direction = pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
+   pixelCoordinate.normalize();
+   var t = eyeCoordinate.clone();
+   var direction = pixelCoordinate.subtract(t.normalize()); // = vector from the eye to the pixel
+
+	// direction from the eye to the pixelCoordinate
+	var pixelRay = new Ray(eyeCoordinate, direction);
+	return pixelRay;
+}
+
+// -----------------------------------------------------------------------------
+function setPixelColor(xPixelIndex, yPixelIndex, color /* now vector */ /*[0,1]*/) {
+
+   var componetsPerPixel = 4;
+   //Every pixel we move down the number of line * the number of componets per line plus the number of pixels in the current line times the number of componets per pixel
+   var index = (xPixelIndex * componetsPerPixel)+(yPixelIndex * componetsPerPixel * pixelsAcross);
+
+   /* Note since color is stored as a vector in sphere, we will use xyz as RGB */
+   imageData.data[index + 0] = color.x * 255;
+	imageData.data[index + 1] = color.y  * 255;
+   imageData.data[index + 2] = color.z * 255;
+	imageData.data[index + 3] = 255;
+}
+
+// -----------------------------------------------------------------------------
+function updateAndRender(timeElapsed) {
+   var seconds = timeElapsed * 0.001;
+   var lightPos = new Vector3(Math.cos(seconds)*0.5, 0, Math.sin(seconds)*0.5);
+	// Go through every pixel
+	for (var yPixelIndex = 0; yPixelIndex < pixelsDown; ++yPixelIndex) {
+		for (var xPixelIndex = 0; xPixelIndex < pixelsAcross; ++xPixelIndex) {
+            var minDepth = farAway; // Set to a big number, infinity
+            setPixelColor(xPixelIndex, yPixelIndex, 0.1);    //Proactivly set each pixel to shadow
+			var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
+            //Check to see if the ray intersects each object
+            for (var item = 0; item < objects.length; item++) {
+                var objResult = objects[item].raycast(pixelRay);
+                // only render this pixel if hit AND it is the closest so far to the camera
+                if(objResult.hit && (objResult.distance <= minDepth)){
+                    minDepth = objResult.distance;  //It is our new closest pixel
+                    var inShadow = false;
+                    var lightRayDirection = (objResult.point.clone().subtract(lightPos)).normalized();  //used for illumination level and shadow determination
+
+                    //Solve for shadow or not
+                    var shadowRay = new Ray(objResult.point.clone().add(lightPos.clone().multiplyScalar(0.01)),lightRayDirection);
+                    for (var shadowCheck = 0; shadowCheck < objects.length; shadowCheck++) {
+                        if(shadowCheck != item && (objects[shadowCheck] instanceof Sphere)){ //Don't check against self AND walls don't cast shadows
+                            var shadowResult = objects[shadowCheck].raycast(shadowRay);
+                            if(shadowResult.hit && (shadowResult.distance<objResult.distance)){
+                                inShadow = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    //Find reflected ray for spheres only
+                    var color = objects[item].color.clone();
+                    if(objects[shadowCheck] instanceof Sphere){
+                        var reflectionRay = pixelRay.clone();
+                        reflectionRay.direction.dot(objResult.normal)
+                        //Need to figure out how to mirror the ray here
+                        var reflectionDepth = farAway;
+                        for (var reflectionCheck = 0; reflectionCheck < objects.length; reflectionCheck++) {
+                            var reflectionResult = objects[reflectionCheck].raycast(reflectionRay);
+                            if(reflectionResult.hit && (reflectionResult.distance < reflectionDepth)){
+                                reflectionDepth = reflectionResult.distance
+                                var reflectedObjNormal = objResult.normal.clone();
+                                var reflectedNormalDotLight = reflectedObjNormal.dot(lightRayDirection);
+                                color = objects[reflectionCheck].color.clone().multiplyScalar(reflectedNormalDotLight);
+                            }
+                        }
+
+                    }
+
+                    // Finally compute and color the pixel
+                    var cloneNormal = objResult.normal.clone();
+                    var normalDotLight = cloneNormal.dot(lightRayDirection);
+                    if(!inShadow){
+                        setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight));
+						            setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight));
+                    }else{
+                        //Instead of setting shadows to pure black, use them to mute the color but assume radiosity would still provide some illumination
+                        setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight).multiplyScalar(0.2));
+                    }
+                }
+            }
+		}
+   }
+
+	// Take our array of color data and give to the canvas to display
+	canvasContext.putImageData(imageData, 0, 0);
+
+	// Let the browser know it should call this function again when it's time to render
+	requestAnimationFrame(updateAndRender);
+}
+
+// We are ready to render, let the browser know
+requestAnimationFrame(updateAndRender);
+
+</script>
+</body>
+</html>
