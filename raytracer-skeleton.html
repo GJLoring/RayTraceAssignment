@@ -127,17 +127,17 @@ function updateAndRender(timeElapsed) {
 
 			var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
 
-            var minDepth = farAway; // Big number
+            var minDepth = farAway; // Set to a big number, infinity
             setPixelColor(xPixelIndex, yPixelIndex, 0.1);
             for (var item = 0; item < objects.length; item++) {
                 var objResult = objects[item].raycast(pixelRay);
                 if(objResult.hit){
-                    /* Shadow cast, needs an offset maybe still working on
+                    /* Shadow cast, needs working on
                     for (var shadowCheck = 0; shadowCheck < objects.length; shadowCheck++) {
-                        var shadowRay = new Ray(objResult.point, lightPos );
+                        var shadowRay = new Ray(objResult.point.clone().add(lightPos.clone().multiplyScalar(0.01)), lightPos );
                         var shadowResult = objects[shadowCheck].raycast(shadowRay);
                         if(shadowResult.hit){
-                            minDepth = -1;
+                            minDepth = -1; // Set the pixel object depth behind the camera so it will not get written
                             break;
                         }
                     }
