@@ -140,26 +140,24 @@ function updateAndRender(timeElapsed) {
                     var inShadow = false;
                     var lightRayDirection = (objResult.point.clone().subtract(lightPos)).normalized();  //used for illumination level and shadow determination
 
-                    /* Shadow cast, needs working on */
                     var shadowRay = new Ray(objResult.point.clone().add(lightPos.clone().multiplyScalar(0.01)),lightRayDirection);
                     for (var shadowCheck = 0; shadowCheck < objects.length; shadowCheck++) {
                         if(shadowCheck != item && (objects[shadowCheck] instanceof Sphere)){ //Don't check against self AND walls don't cast shadows
                             var shadowResult = objects[shadowCheck].raycast(shadowRay);
                             if(shadowResult.hit && (shadowResult.distance<objResult.distance)){
                                 inShadow = true;
-                                setPixelColor(xPixelIndex, yPixelIndex, 0.1);   // we are in shadow, set back to dark
                                 break;
                             }
                         }
                     }
-                    /*end shadow cast */
 
-                    //only computee the color if we are not in shadow
+                    var color = objects[item].color.clone();
+                    var cloneNormal = objResult.normal.clone();
+                    var normalDotLight = cloneNormal.dot(lightRayDirection);
                     if(!inShadow){
-                        var color = objects[item].color.clone();
-                        var cloneNormal = objResult.normal.clone();
-                        var normalDotLight = cloneNormal.dot(lightRayDirection);
                         setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight));
+                    }else{
+                        setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight).multiplyScalar(0.2));
                     }
                 }
             }
