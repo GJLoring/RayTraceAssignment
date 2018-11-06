@@ -157,6 +157,7 @@ function updateAndRender(timeElapsed) {
                     if(objects[shadowCheck] instanceof Sphere){
                         var reflectionRay = pixelRay.clone();
                         reflectionRay.direction.dot(objResult.normal)
+                        //Need to figure out how to mirror the ray here
                         var reflectionDepth = farAway;
                         for (var reflectionCheck = 0; reflectionCheck < objects.length; reflectionCheck++) {
                             var reflectionResult = objects[reflectionCheck].raycast(reflectionRay);
