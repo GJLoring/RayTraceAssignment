@@ -161,7 +161,7 @@ function updateAndRender(timeElapsed) {
                         var reflectionDepth = farAway;
                         for (var reflectionCheck = 0; reflectionCheck < objects.length; reflectionCheck++) {
                             var reflectionResult = objects[reflectionCheck].raycast(reflectionRay);
-                            if(reflectionResult.hit && (reflectionResult.distance < reflectionDepth){
+                            if(reflectionResult.hit && (reflectionResult.distance < reflectionDepth)){
                                 reflectionDepth = reflectionResult.distance
                                 var reflectedObjNormal = objResult.normal.clone();
                                 var reflectedNormalDotLight = reflectedObjNormal.dot(lightRayDirection);
