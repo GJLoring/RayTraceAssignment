@@ -128,31 +128,37 @@ function updateAndRender(timeElapsed) {
 	// Go through every pixel
 	for (var yPixelIndex = 0; yPixelIndex < pixelsDown; ++yPixelIndex) {
 		for (var xPixelIndex = 0; xPixelIndex < pixelsAcross; ++xPixelIndex) {
-
-			var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
-
             var minDepth = farAway; // Set to a big number, infinity
-            
-            setPixelColor(xPixelIndex, yPixelIndex, 0.1);
+            setPixelColor(xPixelIndex, yPixelIndex, 0.1);    //Proactivly set each pixel to shadow
+			var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
+            //Check to see if the ray intersects each object
             for (var item = 0; item < objects.length; item++) {
                 var objResult = objects[item].raycast(pixelRay);
-                if(objResult.hit){
-                   var shadow = false;
-                    /* Shadow cast, needs working on
+                // only render this pixel if hit AND it is the closest so far to the camera
+                if(objResult.hit && (objResult.distance <= minDepth)){
+                    minDepth = objResult.distance;  //It is our new closest pixel
+                    var inShadow = false;
+                    var lightRayDirection = (objResult.point.clone().subtract(lightPos)).normalized();  //used for illumination level and shadow determination
+
+                    /* Shadow cast, needs working on */
+                    var shadowRay = new Ray(objResult.point.clone().add(lightPos.clone().multiplyScalar(0.01)),lightRayDirection);
                     for (var shadowCheck = 0; shadowCheck < objects.length; shadowCheck++) {
-                        var shadowRay = new Ray(objResult.point.clone().add(lightPos.clone().multiplyScalar(0.01)), lightPos );
-                        var shadowResult = objects[shadowCheck].raycast(shadowRay);
-                        if(shadowResult.hit && (shadowResult.distance<objResult.distance)){
-                           shadow = true; 
-                           continue;
+                        if(shadowCheck != item && (objects[shadowCheck] instanceof Sphere)){ //Don't check against self AND walls don't cast shadows
+                            var shadowResult = objects[shadowCheck].raycast(shadowRay);
+                            if(shadowResult.hit && (shadowResult.distance<objResult.distance)){
+                                inShadow = true;
+                                setPixelColor(xPixelIndex, yPixelIndex, 0.1);   // we are in shadow, set back to dark
+                                break;
+                            }
                         }
                     }
-                    end shadow cast */
-                    if(objResult.distance <= minDepth && shadow == false){
-                        minDepth = objResult.distance;
+                    /*end shadow cast */
+
+                    //only computee the color if we are not in shadow
+                    if(!inShadow){
                         var color = objects[item].color.clone();
                         var cloneNormal = objResult.normal.clone();
-                        var normalDotLight = cloneNormal.dot((objResult.point.clone().subtract(lightPos)).normalized());
+                        var normalDotLight = cloneNormal.dot(lightRayDirection);
                         setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight));
                     }
                 }
