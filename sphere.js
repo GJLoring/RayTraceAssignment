@@ -29,7 +29,7 @@ var Sphere = function(origin, radius, color, reflectivity) {
 			result.hit = true;
 			result.point = ray.origin.clone().add(originOffset);
 			result.normal = (result.point.clone().subtract(this.origin)).normalized();
-			result.distance = originOffset.length();
+			result.distanceSquared = originOffset.lengthSqr();
 		}
 
 		return result;

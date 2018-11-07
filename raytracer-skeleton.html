@@ -135,37 +135,35 @@ function updateAndRender(timeElapsed) {
 		for (var xPixelIndex = 0; xPixelIndex < pixelsAcross; ++xPixelIndex) {
             setPixelColor(xPixelIndex, yPixelIndex, 0.1);    //Proactivly set each pixel to shadow
             var pixelAlisResults = [];
-
             for( var antiAliasX = antiAliasStart; antiAliasX <= 1; antiAliasX+=0.5){
             for( var antiAliasY = antiAliasStart; antiAliasY <= 1; antiAliasY+=0.5){
                 var minDepth = farAway; // Set to a big number, infinity
-                var pixelRay = generateRayForPixel(xPixelIndex + antiAliasX, yPixelIndex+antiAliasY); //Check whole and half pixel steps
+                var pixelRay = generateRayForPixel(xPixelIndex + antiAliasX, yPixelIndex + antiAliasY); //Check whole and half pixel steps when antiAlis is true
                 //var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
                 //Check to see if the ray intersects each object
                 for (var item = 0; item < objects.length; item++) {
                     var objResult = objects[item].raycast(pixelRay);
                     // only render this pixel if hit AND it is the closest so far to the camera
-                    if(objResult.hit && (objResult.distance <= minDepth)){
-                        minDepth = objResult.distance;  //It is our new closest pixel
+                    if(objResult.hit && (objResult.distanceSquared <= minDepth)){
+                        minDepth = objResult.distanceSquared;  //It is our new closest pixel
                         var inShadow = false;
                         var lightRayDirection = (objResult.point.clone().subtract(lightPos)).normalized();  //used for illumination level and shadow determination
 
-                        //Solve for shadow or not
+                        //Shadows, cast by spheres only since the walls interfeared with the light at times
                         var shadowRay = new Ray(objResult.point.clone().add(lightPos.clone().multiplyScalar(0.01)),lightRayDirection);
                         for (var shadowCheck = 0; shadowCheck < objects.length; shadowCheck++) {
                             if(shadowCheck != item && (objects[shadowCheck] instanceof Sphere)){ //Don't check against self AND walls don't cast shadows
                                 var shadowResult = objects[shadowCheck].raycast(shadowRay);
-                                if(shadowResult.hit && (shadowResult.distance<objResult.distance)){
+                                if(shadowResult.hit && (shadowResult.distanceSquared<objResult.distanceSquared)){
                                     inShadow = true;
                                     break;
                                 }
                             }
                         }
 
-                        //Find reflected ray for spheres only
                         var color = objects[item].color.clone();
-                        /* Reflection
-                        if(objects[item] instanceof Sphere){
+                        // Reflection
+                        if(objects[item] instanceof Sphere){         //Find reflected ray for spheres only
                             var reflectionRay = pixelRay.clone();
                             reflectionRay.direction.dot(objResult.normal)
                             //Need to figure out how to mirror the ray here
@@ -173,31 +171,32 @@ function updateAndRender(timeElapsed) {
                             for (var reflectionCheck = 0; reflectionCheck < objects.length; reflectionCheck++) {
                                 if(reflectionCheck != item){ //don't reflect self
                                     var reflectionResult = objects[reflectionCheck].raycast(reflectionRay);
-                                    if(reflectionResult.hit && (reflectionResult.distance < reflectionDepth)){
-                                        reflectionDepth = reflectionResult.distance
+                                    if(reflectionResult.hit && (reflectionResult.distanceSquared < reflectionDepth)){
+                                        reflectionDepth = reflectionResult.distanceSquared
                                         var reflectedObjNormal = objResult.normal.clone();
                                         var reflectedNormalDotLight = reflectedObjNormal.dot(lightRayDirection);
-                                        color = objects[reflectionCheck].color.clone().multiplyScalar(reflectedNormalDotLight);
+                                        //color = objects[reflectionCheck].color.clone().multiplyScalar(reflectedNormalDotLight);
                                     }
                                 }
                             }
 
-                        }*/
+                        }
 
                         // Finally compute and color the pixel
                         var cloneNormal = objResult.normal.clone();
                         var normalDotLight = cloneNormal.dot(lightRayDirection);
                         if(!inShadow){
                             //setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight));
-                            pixelAlisResults.push(color.multiplyScalar(normalDotLight)); // anti alias
+                            pixelAlisResults.push(color.clone().multiplyScalar(normalDotLight)); // anti alias
                         }else{
                             //Instead of setting shadows to pure black, use them to mute the color but assume radiosity would still provide some illumination
                             //setPixelColor(xPixelIndex, yPixelIndex, color.multiplyScalar(normalDotLight).multiplyScalar(0.2));
-                            pixelAlisResults.push(color.multiplyScalar(normalDotLight).multiplyScalar(0.2)); // anti alias
+                            pixelAlisResults.push(color.clone().multiplyScalar(normalDotLight).multiplyScalar(0.2)); // anti alias
                             }
                         }
                 }
 
+                //Compute the average of our sampled pixel results to anti-alis our image
                 if(AntiAlias == false){
                     setPixelColor(xPixelIndex, yPixelIndex, pixelAlisResults[pixelAlisResults.length-1]);
                 }else{
