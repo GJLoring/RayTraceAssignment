@@ -1,0 +1,5 @@
+1. Support color (Bonus todo #2)
+2. Support N objects (Bonus todo #1)
+3. Anti-aliasing ( partial, set AntiAlias = true on line 126 to enable ) ( Bonus Todo #4 )
+4. Reflections ( partial, disabled, seems to have a bug still lines 165-183 )
+5. Removed use of Square Root in Distance ( Bonus Todo #4 )
